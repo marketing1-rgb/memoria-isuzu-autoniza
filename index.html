@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío Isuzu</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    
+    background: url('fondo.jpg') no-repeat center center;
+    background-size: cover;
+
+    color: white;
+}
+
+.titulo-img {
+    width: 80%;
+    max-width: 600px;
+}
+
+* {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 1080px;
+    height: 100vh;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    justify-content: flex-start;
+
+    padding: 10px; /* 🔥 antes 20px */
+    gap: 5px;      /* 🔥 antes 10px */
+
+    overflow: hidden; /* 🔥 evita scroll lateral raro */
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 5px; /* 🔥 antes 20px */
+}
+
+.titulo-img {
+    width: 75%;
+    max-width: 550px;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 24px;
+    margin: 0;
+    font-weight: 600;
+}
+
+#contador {
+    font-size: 50px;
+    font-weight: 800;
+
+    height: 50px; /* 🔥 espacio fijo */
+    line-height: 50px;
+
+    margin-top: 5px;
+
+    text-align: center;
+}
+
+button {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* BOTONES */
+.controls {
+     margin-top: 10px;
+}
+
+.controls button {
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+
+    background: white;
+    color: #222323;
+    font-weight: 700;
+
+    outline: none;
+    border: none;
+    font-weight: 700;
+}
+
+button:active {
+    transform: scale(0.97); /* opcional efecto táctil */
+}
+
+/* GRID */
+.game {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+
+    width: 90%;          /* 🔥 IMPORTANTE */
+    max-width: 620px;    /* 🔥 evita recorte */
+
+    margin: 0 auto;
+}
+
+/* CARTAS */
+.card {
+    width: 100%;
+    aspect-ratio: 3/4;
+
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+/* GIRA */
+.card.flip .inner {
+    transform: rotateY(180deg);
+}
+
+/* CARAS */
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    backface-visibility: hidden;
+}
+
+/* PREMIO (ATRÁS) */
+.front {
+    transform: rotateY(180deg);
+    background-size: cover;
+    background-position: center;
+}
+
+/* LOGO (ADELANTE) */
+.back {
+    background: #f2f2f2 url('logo-isuzu.png') center/55% no-repeat;
+}
+/* FOOTER */
+.footer {
+    margin-top: auto; /* 🔥 empuja el logo abajo correctamente */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.footer img {
+    width: 380px;
+}
+/* RESULTADO */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay h2 {
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+
+
+.popup,
+.popup h2,
+.popup button {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.popup {
+    background: white;
+    color: black;
+
+    padding: 30px;
+    border-radius: 20px;
+
+    width: 90%;
+    max-width: 500px; /* 🔥 más grande */
+
+    text-align: center;
+    animation: popIn 0.4s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.popup h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.popup button {
+    background: #E30613;
+    color: white;
+    font-weight: 700;
+    font-size: 22px;
+    padding: 14px 35px;
+
+    border-radius: 12px;
+
+    border: none;       /* 🔥 quita borde */
+    outline: none;      /* 🔥 quita borde negro */
+}
+
+.popup button:focus {
+    outline: none;
+}
+
+.card.ganadora {
+    box-shadow: 0 0 25px gold, 0 0 50px gold;
+    transform: scale(1.05);
+    transition: all 0.4s ease;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+    <img src="titulo-isuzu.png" class="titulo-img">
+    <p>PON A PRUEBA TU MEMORIA</p>
+
+    <!-- 👇 AQUÍ VA -->
+    <p id="contador"></p>
+</div>
+
+    <div class="game" id="game"></div>
+
+<div class="controls">
+    <button onclick="iniciarJuego()">INICIAR</button>
+</div>
+
+    <div class="footer">
+        <img src="logo-autoniza.png">
+    </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="popup">
+        <h2 id="mensaje"></h2>
+        <button onclick="reiniciarJuego()">JUGAR DE NUEVO</button>
+    </div>
+
+<audio id="flipSound" src="flip.mp3"></audio>
+<audio id="winSound" src="win.mp3"></audio>
+<audio id="loseSound" src="lose.mp3"></audio>
+
+<script>
+const premios = [
+    { img: 'premio1.jpg', nombre: 'TERMÓMETRO DIGITAL' },
+    { img: 'premio2.jpg', nombre: 'LANYARD' },
+    { img: 'premio3.jpg', nombre: 'POLO ISUZU' },
+    { img: 'premio4.jpg', nombre: 'GORRA ISUZU' }
+];
+
+let cartas = [];
+let primera = null;
+let segunda = null;
+let bloqueo = true;
+let puedeJugar = false;
+
+const flipSound = document.getElementById('flipSound');
+const winSound = document.getElementById('winSound');
+const loseSound = document.getElementById('loseSound');
+
+function mezclar(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function crearTablero() {
+    const game = document.getElementById('game');
+    game.innerHTML = '';
+
+    cartas = [...premios, ...premios];
+    mezclar(cartas);
+
+    cartas.forEach(premio => {
+        const card = document.createElement('div');
+        card.classList.add('card'); // SIN flip
+
+        card.innerHTML = `
+            <div class="inner">
+                <div class="front" style="background-image:url('${premio.img}')"></div>
+                <div class="back"></div>
+            </div>
+        `;
+
+        game.appendChild(card);
+
+        card.addEventListener('click', () => clickCard(card, premio));
+    });
+}
+
+function iniciarJuego() {
+    if (puedeJugar) return;
+
+    const cards = document.querySelectorAll('.card');
+    const contador = document.getElementById('contador');
+
+    bloqueo = true;
+    puedeJugar = false;
+
+    let tiempo = 3;
+    contador.innerText = " ";
+
+    // MOSTRAR PREMIOS
+    cards.forEach(c => c.classList.add('flip'));
+
+    const intervalo = setInterval(() => {
+        tiempo--;
+        contador.innerText = tiempo;
+
+        if (tiempo === 0) {
+            clearInterval(intervalo);
+            contador.innerText = " ";
+
+            // 🔥 OCULTAR CARTAS (ESTO ES LO QUE FALLABA)
+            setTimeout(() => {
+                cards.forEach(c => c.classList.remove('flip'));
+                bloqueo = false;
+                puedeJugar = true;
+            }, 300); // pequeño delay para estabilidad
+        }
+    }, 1000);
+}
+
+function clickCard(card, premio) {
+    if (bloqueo || !puedeJugar || card.classList.contains('flip')) return;
+
+    flipSound.currentTime = 0;
+    flipSound.play();
+
+    card.classList.add('flip');
+
+    if (!primera) {
+        primera = {card, premio};
+        return;
+    }
+
+    segunda = {card, premio};
+    puedeJugar = false;
+
+    setTimeout(() => {
+  if (primera.premio.nombre === segunda.premio.nombre) {
+        primera.card.classList.add('ganadora');
+        segunda.card.classList.add('ganadora');
+
+        mostrarResultado(true, premio.nombre);
+    } else {
+        primera.card.classList.remove('flip');
+        segunda.card.classList.remove('flip');
+        mostrarResultado(false);
+    }
+}, 1200);
+}
+
+function mostrarResultado(gano, premio) {
+    const overlay = document.getElementById('overlay');
+    const mensaje = document.getElementById('mensaje');
+
+    if (gano) {
+        winSound.play();
+        mensaje.innerHTML = `🎉 ¡GANASTE!<br><strong>${premio}</strong>`;
+    } else {
+        loseSound.play();
+        mensaje.innerText = "❌ INTÉNTALO DE NUEVO";
+    }
+
+    overlay.style.display = 'flex';
+}
+
+function reiniciarJuego() {
+    document.getElementById('overlay').style.display = 'none';
+
+    primera = null;
+    segunda = null;
+    bloqueo = true;
+    puedeJugar = false;
+
+    crearTablero();
+}
+crearTablero();
+
+</script>
+
+</body>
+</html>
